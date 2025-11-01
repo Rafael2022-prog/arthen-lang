@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "arthen-lang"
+version = "1.0.0"
+authors = [
+    { name="ARTHEN Dev Team", email="dev@arthen.lang" },
+]
+description = "ARTHEN: AI-Native Blockchain Development Language"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Compilers",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+[project.urls]
+Homepage = "https://github.com/Rafael2022-prog/arthen-lang"
+Issues = "https://github.com/Rafael2022-prog/arthen-lang/issues"
+
+[project.scripts]
+arthen-parse = "parser.ai_native_parser:main"
+
+[project.optional-dependencies]
+ai = [
+    "torch",
+    "transformers",
+    "huggingface_hub",
+    "safetensors",
+    "tensorflow", # Included for broader AI ecosystem compatibility
+]
+ml = [
+    "scikit-learn",
+    "pandas",
+]
+blockchain = [
+    "web3",
+    "py-solc-x",
+    "eth-tester",
+]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "black",
+    "flake8",
+]
+full = [
+    "arthen-lang[ai]",
+    "arthen-lang[ml]",
+    "arthen-lang[blockchain]",
+]

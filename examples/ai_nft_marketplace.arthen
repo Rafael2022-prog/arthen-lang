@@ -1,0 +1,755 @@
+// ARTHEN Example Project: AI-Powered NFT Marketplace
+// Demonstrates: Automated trading, AI asset valuation, cross-chain NFT operations
+// Target Platforms: Ethereum, Solana, Polygon, Flow, Tezos
+
+∇⟨ai_nft_marketplace⟩ {
+    
+    // ========================================
+    // NFT MARKETPLACE CONTRACT STRUCTURE
+    // ========================================
+    
+    ∆contract AINFTMarketplace {
+        
+        // Core marketplace state
+        ∆addr marketplaceOwner;
+        ∆u256 marketplaceFee;  // Basis points (e.g., 250 = 2.5%)
+        ∆u256 listingCounter;
+        ∆mapping(∆u256 => ∆neural⟨nft_listing⟩) listings;
+        ∆mapping(∆addr => ∆mapping(∆u256 => ∆bool)) approvedNFTs;
+        ∆mapping(∆addr => ∆u256) userReputationScores;
+        
+        // AI valuation and trading components
+        ∆neural⟨price_predictor⟩ aiPricePredictor;
+        ∆tensor⟨market_sentiment⟩ marketSentiment;
+        ∆matrix⟨trading_patterns⟩ tradingPatterns;
+        ∆vector⟨nft_metadata⟩ nftMetadataAnalysis;
+        ∆neural⟨authenticity_detector⟩ authenticityDetector;
+        
+        // Cross-chain NFT state
+        ∆mapping(∆string => ∆addr) crossChainBridges;
+        ∆mapping(∆u256 => ∆cross_chain_nft) crossChainNFTs;
+        ∆vector⟨bridge_transaction⟩ bridgeTransactions;
+        
+        // AI trading bot configuration
+        ∆ai_trading_config tradingConfig = {
+            auto_trading_enabled: true,
+            max_trade_amount: 10000,  // Max 10k tokens per trade
+            risk_tolerance: 0.7,  // 70% risk tolerance
+            profit_threshold: 0.15,  // 15% minimum profit
+            ai_confidence_threshold: 0.85,  // 85% AI confidence required
+            human_oversight_required: false
+        };
+        
+        // Market analytics
+        ∆mapping(∆addr => ∆vector⟨price_history⟩) nftPriceHistory;
+        ∆tensor⟨market_trends⟩ marketTrends;
+        ∆neural⟨demand_predictor⟩ demandPredictor;
+        
+        // ========================================
+        // NFT AND LISTING STRUCTURES
+        // ========================================
+        
+        ∆struct NFTListing {
+            ∆u256 listingId;
+            ∆addr nftContract;
+            ∆u256 tokenId;
+            ∆addr seller;
+            ∆u256 price;
+            ∆u256 listingTime;
+            ∆u256 expirationTime;
+            ∆listing_status status;
+            Ω{confidence} ∆ai_valuation aiValuation;
+            ∆vector⟨market_analysis⟩ marketAnalysis;
+            ∆authenticity_score authenticityScore;
+            ∆cross_chain_availability crossChainAvailable;
+        }
+        
+        ∆struct CrossChainNFT {
+            ∆addr originalContract;
+            ∆u256 originalTokenId;
+            ∆string originalChain;
+            ∆addr wrappedContract;
+            ∆u256 wrappedTokenId;
+            ∆string targetChain;
+            ∆bridge_status status;
+            ∆u256 bridgeTime;
+        }
+        
+        ∆struct AITradingBot {
+            ∆addr botAddress;
+            ∆string botName;
+            ∆ai_strategy strategy;
+            ∆u256 totalTrades;
+            ∆u256 successfulTrades;
+            ∆u256 totalProfit;
+            ∆neural⟨performance⟩ performanceMetrics;
+            ∆bool active;
+        }
+        
+        ∆enum ListingStatus {
+            ACTIVE,
+            SOLD,
+            CANCELLED,
+            EXPIRED,
+            AI_FLAGGED,
+            CROSS_CHAIN_PENDING
+        }
+        
+        ∆enum BridgeStatus {
+            INITIATED,
+            LOCKED,
+            MINTED,
+            COMPLETED,
+            FAILED
+        }
+        
+        ∆enum AIStrategy {
+            MOMENTUM_TRADING,
+            ARBITRAGE,
+            TREND_FOLLOWING,
+            MEAN_REVERSION,
+            SENTIMENT_BASED,
+            HYBRID_AI
+        }
+        
+        // ========================================
+        // CONSTRUCTOR AND INITIALIZATION
+        // ========================================
+        
+        constructor(∆addr _owner, ∆u256 _marketplaceFee) {
+            marketplaceOwner = _owner;
+            marketplaceFee = _marketplaceFee;
+            listingCounter = 0;
+            
+            // Initialize AI components
+            aiPricePredictor = ∇⟨initialize_price_prediction_network⟩();
+            marketSentiment = ∇⟨initialize_sentiment_tensor⟩();
+            tradingPatterns = ∇⟨initialize_trading_matrix⟩();
+            nftMetadataAnalysis = ∇⟨initialize_metadata_vector⟩();
+            authenticityDetector = ∇⟨initialize_authenticity_network⟩();
+            demandPredictor = ∇⟨initialize_demand_network⟩();
+            
+            // Setup cross-chain bridges
+            ∇⟨setup_cross_chain_bridges⟩();
+            
+            // Initialize market trends analysis
+            marketTrends = ∇⟨initialize_market_trends⟩();
+            
+            // Train initial AI models with historical data
+            ∇⟨train_initial_marketplace_models⟩();
+        }
+        
+        // ========================================
+        // AI-POWERED NFT LISTING
+        // ========================================
+        
+        // AI-enhanced NFT listing with automatic valuation
+        ⟨⟨listNFTWithAI⟩⟩(∆addr nftContract, ∆u256 tokenId, ∆u256 askingPrice, 
+                          ∆u256 duration) -> Ω{0.92} ∆listing_result {
+            requires(∇⟨owns_nft⟩(msg.sender, nftContract, tokenId), "Not NFT owner");
+            requires(askingPrice > 0, "Price must be positive");
+            requires(duration > 0, "Duration must be positive");
+            
+            // AI authenticity verification
+            Ω{0.94} ∆authenticity_check = ⟨⟨verifyNFTAuthenticity⟩⟩(nftContract, tokenId);
+            
+            if (authenticity_check.confidence > 0.9 ∧ authenticity_check.value > 0.8) {
+                // AI-powered price analysis and valuation
+                Ω{0.89} ∆ai_valuation = ⟨⟨generateAIValuation⟩⟩(nftContract, tokenId, askingPrice);
+                
+                // Market analysis for optimal pricing
+                ∆market_analysis = ⟨⟨analyzeMarketConditions⟩⟩(nftContract, tokenId);
+                
+                // Cross-chain availability check
+                ∆cross_chain_check = ⟨⟨checkCrossChainAvailability⟩⟩(nftContract, tokenId);
+                
+                // Create listing with AI insights
+                ∆u256 listingId = ++listingCounter;
+                
+                listings[listingId] = ∆neural⟨nft_listing⟩{
+                    listingId: listingId,
+                    nftContract: nftContract,
+                    tokenId: tokenId,
+                    seller: msg.sender,
+                    price: askingPrice,
+                    listingTime: ∇⟨current_timestamp⟩(),
+                    expirationTime: ∇⟨current_timestamp⟩() + duration,
+                    status: ListingStatus.ACTIVE,
+                    aiValuation: ai_valuation,
+                    marketAnalysis: market_analysis.insights,
+                    authenticityScore: authenticity_check.value,
+                    crossChainAvailable: cross_chain_check.available
+                };
+                
+                // Update price history
+                ∇⟨update_price_history⟩(nftPriceHistory[nftContract], tokenId, askingPrice);
+                
+                // Train AI models with new listing data
+                ∇⟨update_ai_models⟩(aiPricePredictor, nftContract, tokenId, askingPrice);
+                
+                // AI price recommendation
+                ∆price_recommendation = "";
+                if (ai_valuation.confidence > 0.85) {
+                    if (askingPrice > ai_valuation.value * 1.2) {
+                        price_recommendation = "Consider lowering price for faster sale";
+                    } else if (askingPrice < ai_valuation.value * 0.8) {
+                        price_recommendation = "Price may be undervalued";
+                    } else {
+                        price_recommendation = "Price is well-aligned with AI valuation";
+                    }
+                }
+                
+                return Ω{0.92} ∆listing_result{
+                    success: true,
+                    listing_id: listingId,
+                    ai_valuation: ai_valuation.value,
+                    ai_confidence: ai_valuation.confidence,
+                    authenticity_score: authenticity_check.value,
+                    price_recommendation: price_recommendation,
+                    cross_chain_available: cross_chain_check.available,
+                    market_sentiment: market_analysis.sentiment_score
+                };
+            }
+            
+            return Ω{0.3} ∆listing_result{
+                success: false,
+                reason: "NFT failed authenticity verification"
+            };
+        }
+        
+        // AI-powered dynamic pricing adjustment
+        ⟨⟨adjustPricingAI⟩⟩(∆u256 listingId) -> Ω{0.88} ∆pricing_adjustment {
+            requires(listings[listingId].listingId != 0, "Listing does not exist");
+            requires(listings[listingId].seller == msg.sender, "Not listing owner");
+            requires(listings[listingId].status == ListingStatus.ACTIVE, "Listing not active");
+            
+            ∆neural⟨nft_listing⟩ listing = listings[listingId];
+            
+            // AI analysis of current market conditions
+            Ω{0.86} ∆market_update = ⟨⟨analyzeCurrentMarket⟩⟩(listing.nftContract, listing.tokenId);
+            
+            // AI demand prediction
+            Ω{0.84} ∆demand_analysis = ⟨⟨predictDemand⟩⟩(listing.nftContract, listing.tokenId);
+            
+            // Calculate optimal price adjustment
+            Ω{0.87} ∆optimal_price = ⟨⟨calculateOptimalPrice⟩⟩(
+                listing, market_update.value, demand_analysis.value
+            );
+            
+            if (optimal_price.confidence > 0.85) {
+                // Apply AI-recommended price adjustment
+                ∆price_change_percentage = (optimal_price.value - listing.price) * 100 / listing.price;
+                
+                if (∇⟨abs⟩(price_change_percentage) > 5) {  // Only adjust if change > 5%
+                    listings[listingId].price = optimal_price.value;
+                    
+                    // Update AI valuation
+                    listings[listingId].aiValuation = optimal_price;
+                    
+                    // Record price adjustment for learning
+                    ∇⟨record_price_adjustment⟩(tradingPatterns, listingId, optimal_price.value);
+                    
+                    return Ω{0.88} ∆pricing_adjustment{
+                        success: true,
+                        old_price: listing.price,
+                        new_price: optimal_price.value,
+                        change_percentage: price_change_percentage,
+                        ai_confidence: optimal_price.confidence,
+                        market_sentiment: market_update.value,
+                        demand_score: demand_analysis.value
+                    };
+                }
+            }
+            
+            return Ω{0.6} ∆pricing_adjustment{
+                success: false,
+                reason: "No significant price adjustment recommended"
+            };
+        }
+        
+        // ========================================
+        // AI TRADING BOTS AND AUTOMATED TRADING
+        // ========================================
+        
+        // Register AI trading bot
+        ⟨⟨registerTradingBot⟩⟩(∆string botName, ∆ai_strategy strategy) -> ∆bot_registration {
+            requires(∇⟨bytes⟩(botName).length > 0, "Bot name required");
+            
+            // AI evaluation of trading strategy
+            ∆strategy_analysis = ⟨⟨evaluateTradingStrategy⟩⟩(strategy);
+            
+            if (strategy_analysis.viable) {
+                ∆addr botAddress = ∇⟨generate_bot_address⟩(msg.sender, botName);
+                
+                // Initialize bot with AI performance metrics
+                ∆ai_trading_bots[botAddress] = ∆ai_trading_bot{
+                    botAddress: botAddress,
+                    botName: botName,
+                    strategy: strategy,
+                    totalTrades: 0,
+                    successfulTrades: 0,
+                    totalProfit: 0,
+                    performanceMetrics: ∇⟨initialize_bot_performance⟩(),
+                    active: true
+                };
+                
+                return ∆bot_registration{
+                    success: true,
+                    bot_address: botAddress,
+                    strategy_score: strategy_analysis.score,
+                    estimated_performance: strategy_analysis.estimated_performance
+                };
+            }
+            
+            return ∆bot_registration{
+                success: false,
+                reason: "Trading strategy not viable"
+            };
+        }
+        
+        // AI-powered automated trading execution
+        ⟨⟨executeAutomatedTrade⟩⟩(∆addr botAddress, ∆u256 listingId) -> Ω{0.91} ∆trade_result {
+            requires(∆ai_trading_bots[botAddress].active, "Bot not active");
+            requires(listings[listingId].status == ListingStatus.ACTIVE, "Listing not active");
+            
+            ∆ai_trading_bot bot = ∆ai_trading_bots[botAddress];
+            ∆neural⟨nft_listing⟩ listing = listings[listingId];
+            
+            // AI trading decision analysis
+            Ω{0.89} ∆trading_decision = ⟨⟨analyzeTradeOpportunity⟩⟩(bot, listing);
+            
+            if (trading_decision.confidence > tradingConfig.ai_confidence_threshold ∧
+                trading_decision.value > tradingConfig.profit_threshold) {
+                
+                // AI risk assessment
+                Ω{0.87} ∆risk_assessment = ⟨⟨assessTradeRisk⟩⟩(bot, listing);
+                
+                if (risk_assessment.value <= tradingConfig.risk_tolerance) {
+                    // Execute trade with ML consensus coordination
+                    ∆consensus_result = ∇⟨ml_consensus_harmony_lib⟩.harmony_all_consensus(
+                        ∆neural⟨network_state⟩{
+                            throughput: trading_decision.value,
+                            latency: 0.1,  // Fast trading execution
+                            security_score: risk_assessment.value,
+                            decentralization_index: 0.8,
+                            consensus_efficiency: 0.95
+                        }
+                    );
+                    
+                    if (consensus_result.consensus_achieved) {
+                        // Execute the trade
+                        ∆trade_execution = ∇⟨execute_nft_purchase⟩(
+                            botAddress, listing.nftContract, listing.tokenId, listing.price
+                        );
+                        
+                        if (trade_execution.success) {
+                            // Update listing status
+                            listings[listingId].status = ListingStatus.SOLD;
+                            
+                            // Update bot performance metrics
+                            ∆ai_trading_bots[botAddress].totalTrades++;
+                            ∆ai_trading_bots[botAddress].successfulTrades++;
+                            
+                            // Calculate and record profit
+                            ∆estimated_profit = trading_decision.value * listing.price;
+                            ∆ai_trading_bots[botAddress].totalProfit += estimated_profit;
+                            
+                            // Update AI learning models
+                            ∇⟨update_trading_patterns⟩(tradingPatterns, bot, listing, trade_execution);
+                            
+                            return Ω{0.91} ∆trade_result{
+                                success: true,
+                                transaction_hash: trade_execution.transaction_hash,
+                                purchase_price: listing.price,
+                                estimated_profit: estimated_profit,
+                                ai_confidence: trading_decision.confidence,
+                                risk_score: risk_assessment.value,
+                                consensus_harmony: consensus_result.harmony_score
+                            };
+                        }
+                    }
+                }
+            }
+            
+            return Ω{0.4} ∆trade_result{
+                success: false,
+                reason: "Trade opportunity not viable or too risky"
+            };
+        }
+        
+        // AI market making and liquidity provision
+        ⟨⟨aiMarketMaking⟩⟩(∆addr nftContract, ∆u256 tokenId) -> Ω{0.86} ∆market_making_result {
+            // AI analysis of market liquidity needs
+            Ω{0.84} ∆liquidity_analysis = ⟨⟨analyzeLiquidityNeeds⟩⟩(nftContract, tokenId);
+            
+            if (liquidity_analysis.confidence > 0.8 ∧ liquidity_analysis.value > 0.7) {
+                // AI-generated bid and ask prices
+                ∆ai_bid_ask = ⟨⟨generateBidAskPrices⟩⟩(nftContract, tokenId, liquidity_analysis.value);
+                
+                // Create market making orders
+                ∆market_orders = ∇⟨create_market_orders⟩(
+                    nftContract, tokenId, ai_bid_ask.bid_price, ai_bid_ask.ask_price
+                );
+                
+                if (market_orders.success) {
+                    // Update market sentiment
+                    ∇⟨update_market_sentiment⟩(marketSentiment, nftContract, tokenId);
+                    
+                    return Ω{0.86} ∆market_making_result{
+                        success: true,
+                        bid_price: ai_bid_ask.bid_price,
+                        ask_price: ai_bid_ask.ask_price,
+                        spread_percentage: ai_bid_ask.spread_percentage,
+                        liquidity_score: liquidity_analysis.value,
+                        orders_created: market_orders.order_count
+                    };
+                }
+            }
+            
+            return Ω{0.5} ∆market_making_result{
+                success: false,
+                reason: "Insufficient liquidity need or market conditions"
+            };
+        }
+        
+        // ========================================
+        // CROSS-CHAIN NFT OPERATIONS
+        // ========================================
+        
+        // Cross-chain NFT bridging with AI optimization
+        ⟨⟨bridgeNFTCrossChain⟩⟩(∆addr nftContract, ∆u256 tokenId, ∆string targetChain) -> Ω{0.90} ∆bridge_result {
+            requires(∇⟨owns_nft⟩(msg.sender, nftContract, tokenId), "Not NFT owner");
+            requires(crossChainBridges[targetChain] != ∆addr(0), "Target chain not supported");
+            
+            // AI analysis of cross-chain bridge conditions
+            Ω{0.88} ∆bridge_analysis = ⟨⟨analyzeBridgeConditions⟩⟩(nftContract, tokenId, targetChain);
+            
+            if (bridge_analysis.confidence > 0.85 ∧ bridge_analysis.value > 0.8) {
+                // AI-optimized bridge route selection
+                ∆optimal_route = ⟨⟨selectOptimalBridgeRoute⟩⟩(targetChain, bridge_analysis.value);
+                
+                // Initiate cross-chain bridge
+                ∆bridge_transaction = ∇⟨initiate_nft_bridge⟩(
+                    nftContract, tokenId, targetChain, optimal_route
+                );
+                
+                if (bridge_transaction.success) {
+                    // Record cross-chain NFT
+                    ∆u256 bridgeId = bridgeTransactions.length;
+                    crossChainNFTs[bridgeId] = ∆cross_chain_nft{
+                        originalContract: nftContract,
+                        originalTokenId: tokenId,
+                        originalChain: ∇⟨get_current_chain⟩(),
+                        wrappedContract: ∆addr(0),  // Will be set when minted
+                        wrappedTokenId: 0,  // Will be set when minted
+                        targetChain: targetChain,
+                        status: BridgeStatus.INITIATED,
+                        bridgeTime: ∇⟨current_timestamp⟩()
+                    };
+                    
+                    // Add to bridge transactions
+                    bridgeTransactions.push(∆bridge_transaction{
+                        bridgeId: bridgeId,
+                        transactionHash: bridge_transaction.transaction_hash,
+                        status: BridgeStatus.INITIATED,
+                        estimatedCompletionTime: ∇⟨current_timestamp⟩() + optimal_route.estimated_time
+                    });
+                    
+                    return Ω{0.90} ∆bridge_result{
+                        success: true,
+                        bridge_id: bridgeId,
+                        transaction_hash: bridge_transaction.transaction_hash,
+                        target_chain: targetChain,
+                        estimated_completion: optimal_route.estimated_time,
+                        bridge_fee: optimal_route.fee,
+                        ai_optimized: true
+                    };
+                }
+            }
+            
+            return Ω{0.4} ∆bridge_result{
+                success: false,
+                reason: "Bridge conditions not optimal or route unavailable"
+            };
+        }
+        
+        // AI-powered cross-chain arbitrage detection
+        ⟨⟨detectCrossChainArbitrage⟩⟩(∆addr nftContract, ∆u256 tokenId) -> Ω{0.87} ∆arbitrage_opportunity {
+            // AI analysis of prices across different chains
+            ∆cross_chain_prices = ∇⟨get_cross_chain_prices⟩(nftContract, tokenId);
+            
+            if (cross_chain_prices.chains_found > 1) {
+                // AI arbitrage opportunity calculation
+                Ω{0.85} ∆arbitrage_analysis = ⟨⟨calculateArbitrageOpportunity⟩⟩(cross_chain_prices);
+                
+                if (arbitrage_analysis.confidence > 0.8 ∧ arbitrage_analysis.value > 0.1) {  // >10% profit
+                    // AI-optimized arbitrage execution plan
+                    ∆execution_plan = ⟨⟨generateArbitrageExecutionPlan⟩⟩(
+                        cross_chain_prices, arbitrage_analysis.value
+                    );
+                    
+                    return Ω{0.87} ∆arbitrage_opportunity{
+                        opportunity_exists: true,
+                        profit_percentage: arbitrage_analysis.value,
+                        source_chain: execution_plan.source_chain,
+                        target_chain: execution_plan.target_chain,
+                        source_price: execution_plan.source_price,
+                        target_price: execution_plan.target_price,
+                        execution_plan: execution_plan,
+                        ai_confidence: arbitrage_analysis.confidence
+                    };
+                }
+            }
+            
+            return Ω{0.3} ∆arbitrage_opportunity{
+                opportunity_exists: false,
+                reason: "No profitable arbitrage opportunity detected"
+            };
+        }
+        
+        // ========================================
+        // AI MARKET ANALYTICS AND INSIGHTS
+        // ========================================
+        
+        // Generate comprehensive market insights
+        ⟨⟨generateMarketInsights⟩⟩(∆addr nftContract) -> Ω{0.89} ∆market_insights {
+            // AI analysis of collection performance
+            ∆collection_analysis = ⟨⟨analyzeCollectionPerformance⟩⟩(nftContract);
+            
+            // AI trend prediction
+            Ω{0.86} ∆trend_prediction = ⟨⟨predictMarketTrends⟩⟩(nftContract, collection_analysis);
+            
+            // AI sentiment analysis
+            ∆sentiment_analysis = ⟨⟨analyzeMarketSentiment⟩⟩(nftContract);
+            
+            // AI price forecasting
+            Ω{0.84} ∆price_forecast = ⟨⟨forecastPrices⟩⟩(nftContract, trend_prediction.value);
+            
+            if (trend_prediction.confidence > 0.8 ∧ price_forecast.confidence > 0.8) {
+                return Ω{0.89} ∆market_insights{
+                    collection_health_score: collection_analysis.health_score,
+                    trend_direction: trend_prediction.value > 0 ? "BULLISH" : "BEARISH",
+                    trend_strength: ∇⟨abs⟩(trend_prediction.value),
+                    sentiment_score: sentiment_analysis.sentiment_score,
+                    price_forecast_7d: price_forecast.value.forecast_7d,
+                    price_forecast_30d: price_forecast.value.forecast_30d,
+                    volatility_index: collection_analysis.volatility,
+                    liquidity_score: collection_analysis.liquidity,
+                    ai_confidence: (trend_prediction.confidence + price_forecast.confidence) / 2,
+                    insights_generated: true
+                };
+            }
+            
+            return Ω{0.6} ∆market_insights{
+                insights_generated: false,
+                reason: "Insufficient data confidence for reliable insights"
+            };
+        }
+        
+        // Real-time market monitoring and alerts
+        ⟨⟨monitorMarketConditions⟩⟩() -> ∆market_monitoring {
+            // AI detection of market anomalies
+            ∆anomaly_detection = ⟨⟨detectMarketAnomalies⟩⟩();
+            
+            // AI flash crash detection
+            ∆flash_crash_risk = ⟨⟨assessFlashCrashRisk⟩⟩();
+            
+            // AI manipulation detection
+            ∆manipulation_check = ⟨⟨detectPriceManipulation⟩⟩();
+            
+            // Overall market health assessment
+            ∆market_health = (anomaly_detection.health_score + 
+                             flash_crash_risk.stability_score + 
+                             manipulation_check.integrity_score) / 3;
+            
+            return ∆market_monitoring{
+                overall_health: market_health,
+                anomalies_detected: anomaly_detection.anomalies_found,
+                flash_crash_risk: flash_crash_risk.risk_level,
+                manipulation_detected: manipulation_check.manipulation_detected,
+                market_status: market_health > 0.8 ? "HEALTHY" : 
+                              market_health > 0.6 ? "MODERATE" : "ALERT",
+                ai_monitored: true,
+                last_update: ∇⟨current_timestamp⟩()
+            };
+        }
+        
+        // ========================================
+        // NFT PURCHASE AND SALES
+        // ========================================
+        
+        // AI-enhanced NFT purchase with smart bidding
+        ⟨⟨purchaseNFTWithAI⟩⟩(∆u256 listingId, ∆u256 maxPrice) -> Ω{0.88} ∆purchase_result {
+            requires(listings[listingId].listingId != 0, "Listing does not exist");
+            requires(listings[listingId].status == ListingStatus.ACTIVE, "Listing not active");
+            requires(maxPrice >= listings[listingId].price, "Insufficient payment");
+            
+            ∆neural⟨nft_listing⟩ listing = listings[listingId];
+            
+            // AI purchase decision analysis
+            Ω{0.86} ∆purchase_analysis = ⟨⟨analyzePurchaseDecision⟩⟩(listing, maxPrice);
+            
+            if (purchase_analysis.confidence > 0.8 ∧ purchase_analysis.value > 0.7) {
+                // AI-optimized bidding strategy
+                ∆optimal_bid = ⟨⟨calculateOptimalBid⟩⟩(listing, maxPrice, purchase_analysis.value);
+                
+                // Execute purchase with ML consensus
+                ∆consensus_result = ∇⟨ml_consensus_harmony_lib⟩.harmony_proof_of_stake(
+                    ∆neural⟨network_state⟩{
+                        throughput: 0.9,
+                        latency: 0.1,
+                        security_score: 0.95,
+                        decentralization_index: 0.8,
+                        consensus_efficiency: 0.9
+                    }
+                );
+                
+                if (consensus_result.consensus_achieved) {
+                    // Execute the purchase
+                    ∆purchase_execution = ∇⟨execute_nft_purchase⟩(
+                        msg.sender, listing.nftContract, listing.tokenId, optimal_bid.amount
+                    );
+                    
+                    if (purchase_execution.success) {
+                        // Update listing status
+                        listings[listingId].status = ListingStatus.SOLD;
+                        
+                        // Update user reputation
+                        userReputationScores[msg.sender] += 10;  // Successful purchase
+                        userReputationScores[listing.seller] += 15;  // Successful sale
+                        
+                        // Update AI learning models
+                        ∇⟨update_purchase_patterns⟩(tradingPatterns, listing, optimal_bid.amount);
+                        
+                        // Calculate marketplace fee
+                        ∆fee_amount = optimal_bid.amount * marketplaceFee / 10000;
+                        
+                        return Ω{0.88} ∆purchase_result{
+                            success: true,
+                            transaction_hash: purchase_execution.transaction_hash,
+                            purchase_price: optimal_bid.amount,
+                            marketplace_fee: fee_amount,
+                            ai_analysis_score: purchase_analysis.value,
+                            ai_confidence: purchase_analysis.confidence,
+                            reputation_gained: 10
+                        };
+                    }
+                }
+            }
+            
+            return Ω{0.4} ∆purchase_result{
+                success: false,
+                reason: "Purchase not recommended by AI analysis"
+            };
+        }
+        
+        // ========================================
+        // UTILITY AND QUERY FUNCTIONS
+        // ========================================
+        
+        // Get AI-enhanced listing details
+        ⟨⟨getListingDetailsAI⟩⟩(∆u256 listingId) -> ∆listing_details {
+            requires(listings[listingId].listingId != 0, "Listing does not exist");
+            
+            ∆neural⟨nft_listing⟩ listing = listings[listingId];
+            
+            // Get current AI analysis
+            ∆current_analysis = ⟨⟨getCurrentAIAnalysis⟩⟩(listing);
+            
+            // Get price history and trends
+            ∆price_trends = ∇⟨get_price_trends⟩(listing.nftContract, listing.tokenId);
+            
+            return ∆listing_details{
+                basic_info: listing,
+                current_ai_analysis: current_analysis,
+                price_trends: price_trends,
+                market_sentiment: ∇⟨get_current_sentiment⟩(listing.nftContract),
+                cross_chain_prices: ∇⟨get_cross_chain_prices⟩(listing.nftContract, listing.tokenId),
+                authenticity_verification: listing.authenticityScore
+            };
+        }
+        
+        // Get AI trading bot performance
+        ⟨⟨getTradingBotPerformance⟩⟩(∆addr botAddress) -> ∆bot_performance {
+            requires(∆ai_trading_bots[botAddress].active, "Bot not found or inactive");
+            
+            ∆ai_trading_bot bot = ∆ai_trading_bots[botAddress];
+            
+            // Calculate performance metrics
+            ∆success_rate = bot.totalTrades > 0 ? 
+                           (bot.successfulTrades * 100) / bot.totalTrades : 0;
+            ∆average_profit = bot.successfulTrades > 0 ? 
+                             bot.totalProfit / bot.successfulTrades : 0;
+            
+            return ∆bot_performance{
+                bot_info: bot,
+                success_rate: success_rate,
+                average_profit_per_trade: average_profit,
+                total_profit: bot.totalProfit,
+                performance_score: bot.performanceMetrics.overall_score,
+                strategy_effectiveness: bot.performanceMetrics.strategy_score,
+                risk_adjusted_return: bot.performanceMetrics.risk_adjusted_return
+            };
+        }
+        
+        // ========================================
+        // ACCESS CONTROL AND MODIFIERS
+        // ========================================
+        
+        modifier onlyOwner {
+            requires(msg.sender == marketplaceOwner, "Only owner can call");
+            _;
+        }
+        
+        modifier listingExists(∆u256 listingId) {
+            requires(listings[listingId].listingId != 0, "Listing does not exist");
+            _;
+        }
+        
+        modifier aiSecurityCheck {
+            ∆security_status = ⟨⟨checkMarketplaceSecurity⟩⟩();
+            requires(security_status.secure, "Security alert active");
+            _;
+        }
+        
+        modifier validNFT(∆addr nftContract, ∆u256 tokenId) {
+            requires(∇⟨is_valid_nft⟩(nftContract, tokenId), "Invalid NFT");
+            _;
+        }
+    }
+    
+    // ========================================
+    // DEPLOYMENT AND CONFIGURATION
+    // ========================================
+    
+    // Multi-chain deployment configuration
+    ∇⟨nft_marketplace_deployment_config⟩ {
+        ethereum: {
+            marketplace_fee: 250,  // 2.5%
+            min_listing_duration: 3600,  // 1 hour
+            max_listing_duration: 2592000,  // 30 days
+            supported_nft_standards: ["ERC721", "ERC1155"]
+        },
+        solana: {
+            marketplace_fee: 200,  // 2.0%
+            min_listing_duration: 3600,
+            max_listing_duration: 2592000,
+            supported_nft_standards: ["Metaplex"]
+        },
+        polygon: {
+            marketplace_fee: 150,  // 1.5%
+            min_listing_duration: 1800,  // 30 minutes
+            max_listing_duration: 2592000,
+            supported_nft_standards: ["ERC721", "ERC1155"]
+        },
+        flow: {
+            marketplace_fee: 300,  // 3.0%
+            min_listing_duration: 3600,
+            max_listing_duration: 2592000,
+            supported_nft_standards: ["Flow NFT"]
+        }
+    }
+}
+
+// Export AI NFT Marketplace
+export ∇⟨ai_nft_marketplace⟩;

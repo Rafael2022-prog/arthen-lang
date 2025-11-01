@@ -1,0 +1,13 @@
+ARTHEN LANGUAGE TEST SUMMARY
+==================================================
+
+Execution Time: 104.84 seconds
+Success Rate: 0.0%
+Categories Passed: 0
+Categories Failed: 2
+Total Categories: 2
+
+CATEGORY DETAILS:
+--------------------
+unit_tests: FAIL
+integration_tests: FAIL

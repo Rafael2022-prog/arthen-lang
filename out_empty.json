@@ -1,0 +1,13 @@
+{
+  "ast": {
+    "type": "empty_program",
+    "nodes": []
+  },
+  "tokens": [],
+  "ai_metadata": {
+    "parsing_confidence": 0.0,
+    "machine_readability": 0.0,
+    "optimization_level": "none",
+    "error": "No tokens found"
+  }
+}

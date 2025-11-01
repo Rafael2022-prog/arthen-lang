@@ -1,0 +1,314 @@
+# ARTHEN Programming Language .gitignore
+# AI-Native Blockchain Development Platform
+
+# Build directories
+build/
+dist/
+artifacts/
+cache/
+logs/
+temp/
+tmp/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+*.egg-info/
+.eggs/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
+# Python distribution wheels (do not commit offline vendor packages)
+*.whl
+.hypothesis/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+*.tgz
+package-lock.json
+yarn.lock
+
+# AI Models and Data
+models/
+*.model
+*.pkl
+*.joblib
+*.h5
+*.pb
+checkpoints/
+tensorboard_logs/
+wandb/
+
+# Blockchain artifacts
+contracts/build/
+contracts/cache/
+*.abi
+*.bin
+*.wasm
+deployments/
+.openzeppelin/
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.staging
+
+# Configuration files (keep templates)
+config.json
+secrets.json
+private.key
+*.pem
+*.p12
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+.nyc_output/
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# next.js build output
+.next
+
+# nuxt.js build output
+.nuxt
+
+# vuepress build output
+.vuepress/dist
+
+# Serverless directories
+.serverless
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+.dynamodb/
+
+# TernJS port file
+.tern-port
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# Temporary folders
+tmp/
+temp/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# JetBrains IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# ARTHEN specific
+*.arthen.compiled
+*.arthen.optimized
+*.arthen.analyzed
+arthen_cache/
+arthen_temp/
+
+# Blockchain network data
+blockchain_data/
+testnet_data/
+mainnet_data/
+
+# Security keys (NEVER commit these)
+*.key
+*.pem
+*.p12
+*.pfx
+mnemonic.txt
+seed.txt
+private_keys/
+wallets/
+
+# Test artifacts
+test_results/
+test_coverage/
+test_reports/
+
+# Documentation build
+docs/build/
+docs/_build/
+site/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# celery beat schedule file
+celerybeat-schedule
+
+# SageMath parsed files
+*.sage.py
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# Local development
+local/
+dev/
+development/
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Archive files
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Compiled ARTHEN contracts
+compiled_contracts/
+deployed_contracts/
+
+# AI training data
+training_data/
+datasets/
+*.csv
+*.json.gz
+
+# Performance benchmarks
+benchmarks/results/
+performance_logs/
+
+# Docker
+.dockerignore
+Dockerfile.dev
+docker-compose.override.yml
+
+# Kubernetes
+k8s/secrets/
+k8s/dev/
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# Local configuration overrides
+local.config.json
+dev.config.json
+test.config.json
