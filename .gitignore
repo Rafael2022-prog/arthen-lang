@@ -222,6 +222,8 @@ wallets/
 # Test artifacts
 test_results/
 test_coverage/
+# Ignore pytest report artifacts
+tests/reports/
 test_reports/
 
 # Documentation build
