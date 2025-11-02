@@ -233,6 +233,18 @@ arthen deploy --network ethereum --contract compiled/contract.sol
 arthen deploy --networks ethereum,solana,cosmos --contract contract.arthen
 ```
 
+## 📦 Rilis
+
+- **Rilis terbaru**: https://github.com/Rafael2022-prog/arthen-lang/releases/latest
+- **Rilis v1.0.0**: https://github.com/Rafael2022-prog/arthen-lang/releases/tag/v1.0.0
+- **Changelog**: [CHANGELOG.md](CHANGELOG.md)
+- **Catatan Rilis**: [RELEASE_NOTES.md](RELEASE_NOTES.md)
+
+Unduh artefak (.whl / .tar.gz) dari halaman rilis, lalu instal lokal:
+```bash
+pip install ./arthen_lang-1.0.0-py3-none-any.whl
+```
+
 ## 🤝 Kontribusi
 
 ARTHEN adalah proyek open-source yang menyambut kontribusi dari komunitas:
