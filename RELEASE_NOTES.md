@@ -9,10 +9,12 @@ This is the first official release of ARTHEN-LANG, a revolutionary native langua
 - **Autonomous Development**: Lays the foundation for self-optimizing and evolving smart contracts.
 
 ## What’s New
-- **Repository Migration**: The official repository has been moved to `https://github.com/Rafael2022-prog/arthen-lang`. All internal links and package metadata have been updated.
-- **Initial Commit**: The project has been initialized with a clean Git history, and the default branch is now `main`.
-- **Build System**: The project is now configured to be built as a Python package using `pyproject.toml`, and the build artifacts are validated with `twine`.
-- **Release Tagging**: This release is tagged as `v1.0.0` in the Git repository.
+- **Specification Freeze (Alpha)**: A stability addendum has been added to `ARTHEN_SPEC.md`, defining frozen lexical tokens, directives, and a minimal grammar subset for public API stability.
+- **Public API & Policies**: New documentation in `docs/API.md`, `docs/VERSIONING.md`, and `docs/DEPRECATION_POLICY.md` establishes request/response contracts, semantic versioning, and deprecation windows.
+- **Build-Level Acceptance CI (Phase 2)**: Added `.github/workflows/build_acceptance.yml` with jobs for Ethereum (Solidity, solc + solhint + slither best-effort) and Solana (Rust, cargo) to validate toolchain readiness.
+- **CLI & Hardening Guides**: Introduced `docs/CLI.md` and `docs/HARDENING_GUIDE.md` to guide usage and security best practices across major chains.
+- **Release & Packaging Policy**: Added `docs/RELEASE_POLICY.md` to formalize release channels and packaging via `pyproject.toml` and GitHub Releases.
+- **End-to-End Examples (Draft)**: Created minimal guides in `examples/ethereum/e2e-minimal/README.md` and `examples/solana/e2e-minimal/README.md` for adapting ARTHEN outputs to Sepolia and Devnet deployments.
 
 ## Getting Started
 To get started with ARTHEN-LANG, clone the repository and install the dependencies:
