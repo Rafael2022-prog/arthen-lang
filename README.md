@@ -1,5 +1,11 @@
 # ARTHEN Programming Language
 
+[![CI](https://github.com/Rafael2022-prog/arthen-lang/actions/workflows/ci.yml/badge.svg)](https://github.com/Rafael2022-prog/arthen-lang/actions/workflows/ci.yml)
+[![GitHub release](https://img.shields.io/github/v/release/Rafael2022-prog/arthen-lang?sort=semver)](https://github.com/Rafael2022-prog/arthen-lang/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Issues](https://img.shields.io/github/issues/Rafael2022-prog/arthen-lang.svg)](https://github.com/Rafael2022-prog/arthen-lang/issues)
+[![Twitter Follow](https://img.shields.io/twitter/follow/ARTHENLang?style=social)](https://twitter.com/ARTHENLang)
+
 **ARTHEN** adalah bahasa pemrograman native yang revolusioner, dirancang khusus untuk pengembangan ekosistem blockchain dengan kemampuan AI-native dan konsensus ML-driven harmony.
 
 ## 🌟 Fitur Utama
