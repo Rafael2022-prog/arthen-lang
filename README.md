@@ -233,6 +233,32 @@ arthen deploy --network ethereum --contract compiled/contract.sol
 arthen deploy --networks ethereum,solana,cosmos --contract contract.arthen
 ```
 
+### Website & API Server
+
+Backend (FastAPI):
+```bash
+# Jalankan dari root proyek
+pip install -r server/backend/requirements.txt
+uvicorn app.main:app --reload --port 8000
+# API tersedia di http://127.0.0.1:8000
+```
+
+Frontend (React + Vite):
+```bash
+cd server/frontend
+npm install
+npm run dev
+# UI tersedia di http://localhost:5173
+```
+
+Konfigurasi:
+- Base URL API dapat diubah via file `.env` di `server/frontend` dengan variabel `VITE_API_BASE`.
+- CORS sudah diaktifkan untuk `http://localhost:5173` pada backend.
+- Playground memanggil endpoint:
+  - `POST /api/parse` untuk tokenisasi + AST (fallback ML jika AI offline)
+  - `POST /api/compile` untuk kompilasi multi-chain (ethereum, solana, cosmos, polkadot, near, move_aptos, cardano)
+  - `GET /api/examples` dan `GET /api/examples/{name}` untuk contoh kode bawaan
+
 ## 📦 Rilis
 
 - **Rilis terbaru**: https://github.com/Rafael2022-prog/arthen-lang/releases/latest
