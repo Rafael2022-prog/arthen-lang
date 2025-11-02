@@ -25,6 +25,35 @@ const Playground: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string>('')
   const [target, setTarget] = useState<string>('ethereum')
+  const allowedTargets = ['ethereum','solana','cosmos','polkadot','near','move_aptos','cardano'] as const
+  
+  const normalizeTarget = (t: string): string => {
+    const x = t.toLowerCase().trim()
+    if (x === 'move' || x === 'aptos' || x === 'sui') return 'move_aptos'
+    return x
+  }
+  
+  const inferTargetsFromSource = (src: string): string[] => {
+    const results: string[] = []
+    // ∆compile_target⟨solana⟩
+    const m1 = src.match(/∆compile_target⟨\s*([a-zA-Z0-9_]+)\s*⟩/)
+    if (m1 && m1[1]) results.push(normalizeTarget(m1[1]))
+    // ∆target_chains: [ethereum, solana]
+    const m2 = src.match(/∆target_chains:\s*\[([^\]]+)\]/)
+    if (m2 && m2[1]) {
+      m2[1].split(',').map(s => s.trim()).forEach(w => results.push(normalizeTarget(w)))
+    }
+    const uniq = Array.from(new Set(results))
+    return uniq.filter(r => allowedTargets.includes(r as any))
+  }
+  
+  // Auto-set target dari source directive
+  useEffect(() => {
+    const ts = inferTargetsFromSource(code)
+    if (ts.length > 0 && ts[0] !== target) {
+      setTarget(ts[0])
+    }
+  }, [code])
 
   useEffect(() => {
     const init = async () => {
@@ -112,6 +141,20 @@ const Playground: React.FC = () => {
             <option value="move_aptos">move_aptos</option>
             <option value="cardano">cardano</option>
           </select>
+          {/* Tombol cepat per target */}
+          <div className="hidden md:flex items-center gap-2">
+            {allowedTargets.map((t) => (
+              <button
+                key={t}
+                onClick={() => compile(t)}
+                className="px-3 py-2 rounded border border-gray-700 hover:border-gray-500 text-white text-xs"
+                disabled={loading}
+                title={`Compile cepat → ${t}`}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
           <button
             onClick={() => parse()}
             className="px-4 py-2 rounded bg-brand-600 hover:bg-brand-500 text-white text-sm"

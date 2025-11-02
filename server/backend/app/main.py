@@ -94,18 +94,29 @@ def version() -> Dict[str, Any]:
 @app.post("/api/parse", response_model=ParseResponse)
 def parse(req: ParseRequest) -> ParseResponse:
     try:
-        lexer = NeuralLexer(model_mode=req.model_mode or "ml")
+        backend_mode = str(req.model_mode or "ml")
+        # Inisialisasi lexer dengan fallback kompatibilitas versi
+        try:
+            lexer = NeuralLexer(backend_mode)
+        except TypeError:
+            # Jika signature tidak menerima argumen, gunakan default ctor
+            lexer = NeuralLexer()
         tokens: List[AIToken] = lexer.tokenize(req.source)
-        parser = TransformerASTGenerator(model_mode=req.model_mode or "ml")
+        # Inisialisasi parser dengan fallback kompatibilitas versi
+        try:
+            parser = TransformerASTGenerator(backend_mode)
+        except TypeError:
+            parser = TransformerASTGenerator()
         raw_ast = parser.generate_ast(tokens)
         optimizer = AIParsingOptimizer()
         optimized_ast = optimizer.optimize(raw_ast)
         node_count = len(optimized_ast.get("nodes", [])) if isinstance(optimized_ast, dict) else 0
+        backend_used = getattr(lexer, "model_mode", backend_mode)
         return ParseResponse(
             token_count=len(tokens),
             node_count=node_count,
             ast=optimized_ast,
-            backend_mode=str(req.model_mode or "ml"),
+            backend_mode=str(backend_used),
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Parse error: {str(e)}")
