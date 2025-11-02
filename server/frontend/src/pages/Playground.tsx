@@ -24,6 +24,7 @@ const Playground: React.FC = () => {
   const [compileResult, setCompileResult] = useState<CompileResponse | null>(null)
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string>('')
+  const [target, setTarget] = useState<string>('ethereum')
 
   useEffect(() => {
     const init = async () => {
@@ -97,6 +98,20 @@ const Playground: React.FC = () => {
               <option key={name} value={name}>{name}</option>
             ))}
           </select>
+          <select
+            value={target}
+            onChange={(e) => setTarget(e.target.value)}
+            className="bg-gray-900 border border-gray-700 rounded px-3 py-2 text-sm"
+            title="Pilih target blockchain"
+          >
+            <option value="ethereum">ethereum</option>
+            <option value="solana">solana</option>
+            <option value="cosmos">cosmos</option>
+            <option value="polkadot">polkadot</option>
+            <option value="near">near</option>
+            <option value="move_aptos">move_aptos</option>
+            <option value="cardano">cardano</option>
+          </select>
           <button
             onClick={() => parse()}
             className="px-4 py-2 rounded bg-brand-600 hover:bg-brand-500 text-white text-sm"
@@ -105,11 +120,11 @@ const Playground: React.FC = () => {
             {loading ? 'Memproses…' : 'Parse & Analyze'}
           </button>
           <button
-            onClick={() => compile('ethereum')}
+            onClick={() => compile(target)}
             className="px-4 py-2 rounded border border-gray-700 hover:border-gray-500 text-white text-sm"
             disabled={loading}
           >
-            Compile → Ethereum
+            Compile → {target}
           </button>
         </div>
       </div>
