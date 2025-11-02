@@ -5,7 +5,7 @@ from typing import List, Optional, Dict, Any
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
+import logging
 
 # Ensure project root is on PYTHONPATH to import ARTHEN modules
 ROOT_DIR = Path(__file__).resolve().parents[3]
@@ -26,11 +26,28 @@ from compiler.arthen_compiler_architecture import (
 # -----------------------------
 # Pydantic request/response models
 # -----------------------------
+try:
+    # Pydantic v2
+    from pydantic import BaseModel, Field, ConfigDict
+    HAS_CONFIGDICT = True
+except Exception:
+    # Pydantic v1 fallback
+    from pydantic import BaseModel, Field
+    ConfigDict = None
+    HAS_CONFIGDICT = False
+
 class ParseRequest(BaseModel):
     source: str = Field(..., description="ARTHEN source code to parse")
     model_mode: Optional[str] = Field(
         default="ml", description="Backend mode for parser: ai|ml|none"
     )
+
+    # Suppress protected namespace warning across Pydantic versions
+    if HAS_CONFIGDICT and ConfigDict is not None:
+        model_config = ConfigDict(protected_namespaces=())
+    else:
+        class Config:
+            protected_namespaces = ()
 
 class ParseResponse(BaseModel):
     token_count: int
@@ -67,10 +84,19 @@ class ExampleContentResponse(BaseModel):
 # -----------------------------
 app = FastAPI(title="ARTHEN-LANG API", version="1.0.0")
 
+# Configure basic logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("arthen")
+
 # CORS for local Vite dev server
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5174",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -95,11 +121,11 @@ def version() -> Dict[str, Any]:
 def parse(req: ParseRequest) -> ParseResponse:
     try:
         backend_mode = str(req.model_mode or "ml")
+        logger.info(f"/api/parse backend_mode={backend_mode} source_len={len(req.source)}")
         # Inisialisasi lexer dengan fallback kompatibilitas versi
         try:
             lexer = NeuralLexer(backend_mode)
         except TypeError:
-            # Jika signature tidak menerima argumen, gunakan default ctor
             lexer = NeuralLexer()
         tokens: List[AIToken] = lexer.tokenize(req.source)
         # Inisialisasi parser dengan fallback kompatibilitas versi
@@ -119,11 +145,13 @@ def parse(req: ParseRequest) -> ParseResponse:
             backend_mode=str(backend_used),
         )
     except Exception as e:
+        logger.exception("Parse error")
         raise HTTPException(status_code=500, detail=f"Parse error: {str(e)}")
 
 @app.post("/api/compile", response_model=CompileResponse)
 def compile(req: CompileRequest) -> CompileResponse:
     try:
+        logger.info(f"/api/compile target={req.target}")
         # Map target string to enum
         target_map = {
             "ethereum": BlockchainTarget.ETHEREUM,
@@ -161,6 +189,7 @@ def compile(req: CompileRequest) -> CompileResponse:
     except HTTPException:
         raise
     except Exception as e:
+        logger.exception("Compile error")
         raise HTTPException(status_code=500, detail=f"Compile error: {str(e)}")
 
 @app.get("/api/examples", response_model=ExampleListResponse)
