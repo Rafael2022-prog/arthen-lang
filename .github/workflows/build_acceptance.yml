@@ -1,0 +1,119 @@
+name: Build-Level Acceptance (Phase 2)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  ethereum-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Python deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install py-solc-x
+
+      - name: Generate Solidity from ARTHEN
+        run: |
+          python scripts/generate_ethereum_solidity.py
+
+      - name: Install solc 0.8.x
+        run: |
+          python - <<'PY'
+          from solcx import install_solc
+          install_solc('0.8.21')
+          PY
+
+      - name: Compile with solc (py-solc-x)
+        run: |
+          python - <<'PY'
+          from solcx import set_solc_version, compile_files
+          from pathlib import Path
+          set_solc_version('0.8.21')
+          sol_file = Path('build_artifacts/ethereum/ai_governance_system.sol')
+          result = compile_files([str(sol_file)])
+          print('solc compile OK:', bool(result))
+          PY
+
+  ethereum-security:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install tools
+        run: |
+          npm i -g solhint
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install py-solc-x slither-analyzer
+
+      - name: Generate Solidity from ARTHEN
+        run: |
+          python scripts/generate_ethereum_solidity.py
+
+      - name: Lint with solhint
+        run: |
+          solhint -V || true
+          npx --yes solhint build_artifacts/ethereum/ai_governance_system.sol || true
+
+      - name: Compile with solc for slither
+        run: |
+          python - <<'PY'
+          from solcx import install_solc, set_solc_version
+          install_solc('0.8.21')
+          set_solc_version('0.8.21')
+          PY
+
+      - name: Static analysis with slither (best-effort)
+        run: |
+          slither . --solc-remaps @openzeppelin=node_modules/@openzeppelin || true
+
+  solana-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Python deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Generate Solana crate (minimal)
+        run: |
+          python scripts/generate_solana_program.py
+
+      - name: Cargo build (check)
+        run: |
+          cd build_artifacts/solana
+          cargo build --quiet
