@@ -321,6 +321,57 @@ ARTHEN adalah **Native Programming Language** yang dirancang khusus untuk menuli
 
 ---
 
+## Specification Freeze (Alpha)
+
+This addendum defines the minimal, stable grammar and directives enforced by the current parser/lexer and compiler pipeline for public-ready Alpha.
+
+### Lexical Tokens (stable subset)
+- `∆` (Delta): directive / typed binding prefix
+- `∇` (Nabla): block declaration prefix
+- `⟨name⟩`: generic angle qualifier for identifiers and targets
+- `{ ... }`: block body
+- `:`: key-value separator inside directive bodies
+- `[` `]`: list syntax for directive values
+- `->`: chain routing for cross-chain blocks, e.g. `ethereum->solana`
+
+### Directives (stable)
+- `∆compile_target⟨chain⟩ { /* optional key: value pairs */ }`
+- `∆target_chains: [ethereum, solana, cosmos, polkadot, near, move_aptos, cardano]`
+- Additional keys are allowed inside directive bodies, but parsers must ignore unknown keys for forward compatibility.
+
+### Grammar (EBNF-like, Alpha subset)
+```
+program        := statement*
+statement      := block | directive | comment
+block          := "∇" "⟨" Identifier "⟩" chain_route? "{" body "}"
+chain_route    := SourceChain "->" TargetChain
+body           := (statement | kv_pair | empty)*
+directive      := compile_target | target_chains
+compile_target := "∆compile_target" "⟨" Chain "⟩" "{" kv_pairs? "}"
+target_chains  := "∆target_chains" ":" "[" Chains "]"
+Chains         := Chain ("," Chain)*
+Chain          := "ethereum" | "solana" | "cosmos" | "polkadot" | "near" | "move_aptos" | "cardano"
+kv_pair        := Identifier ":" Value
+Value          := Identifier | Number | String | List
+```
+
+### Semantics (minimal, enforced)
+- `∆compile_target⟨chain⟩` selects the primary codegen target for that block/scope.
+- `∆target_chains` acts as a multi-target hint for UI/CLI and compiler frontends; the compiler will still require an explicit target for code emission.
+- Cross-chain block `∇⟨ai_bridge⟩ ethereum->solana { ... }` is permitted and treated as metadata for routing; codegen remains per-target.
+
+### Reserved Identifiers (partial)
+- Consensus: `pos_ml`, `pow_ai`, `dpos_neural`, `pbft_ml`, `federated_ai` (used in examples)
+- Types: `∆tensor⟨...⟩`, `∆matrix⟨...⟩`, `∆vector⟨...⟩`, `∆neural⟨...⟩`
+- Optimization keys: `∆ai_optimization_level`, `∆gas_optimization`, etc. Unknown keys are ignored.
+
+### Compatibility Notes
+- Parser/Lexer must remain tolerant to unknown directive keys (forward compatible).
+- Angle qualifier `⟨ ⟩` is part of the core syntax; consumers should not rely on ASCII alternatives.
+- Chain enum values above are stable; additions are allowed, removals require deprecation windows.
+
+---
+
 ## Kesimpulan
 
 ARTHEN adalah native programming language yang revolusioner untuk pengembangan ekosistem blockchain dengan karakteristik utama:
