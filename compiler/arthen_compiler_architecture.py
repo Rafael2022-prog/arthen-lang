@@ -1159,11 +1159,21 @@ class ARTHENCompiler:
     """Main ARTHEN Compiler Class"""
     
     def __init__(self):
-        self.lexer = AIOptimizedLexer()
-        self.parser = TransformerParser()
-        self.code_generator = MultiTargetCodeGenerator()
-        self.optimizer = AICodeOptimizer()
-        self.security_analyzer = MLSecurityAnalyzer()
+        import os
+        test_mode = os.getenv("ARTHEN_TEST_MODE", "").lower() in ("1", "true", "yes", "on")
+        if test_mode:
+            # Skip heavy model instantiation in test mode to reduce CI/generator overhead
+            self.lexer = None
+            self.parser = None
+            self.code_generator = None
+            self.optimizer = None
+            self.security_analyzer = None
+        else:
+            self.lexer = AIOptimizedLexer()
+            self.parser = TransformerParser()
+            self.code_generator = MultiTargetCodeGenerator()
+            self.optimizer = AICodeOptimizer()
+            self.security_analyzer = MLSecurityAnalyzer()
     
     def compile(self, source_code: str, config: CompilationConfig) -> Dict[str, Any]:
         """Complete ARTHEN compilation pipeline"""
