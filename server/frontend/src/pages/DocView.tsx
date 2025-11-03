@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import remarkBreaks from 'remark-breaks'
+import rehypeRaw from 'rehype-raw'
 
 const sanitizePath = (raw: string): string => {
   let p = raw
@@ -69,7 +71,7 @@ const DocView: React.FC = () => {
       {error && <div className="text-sm text-red-400">{error}</div>}
       {!loading && !error && (
         <article className="prose prose-invert max-w-none">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+          <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]} rehypePlugins={[rehypeRaw]}>{content}</ReactMarkdown>
         </article>
       )}
     </div>
