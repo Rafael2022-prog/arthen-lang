@@ -47,6 +47,8 @@ const DocView: React.FC = () => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    const controller = new AbortController()
+
     const load = async () => {
       if (!safePath) {
         setError('Path dokumen tidak valid. Pastikan menggunakan path relatif dari folder docs/, mis. API.md atau TUTORIALS/solana.md')
@@ -55,7 +57,7 @@ const DocView: React.FC = () => {
       }
       try {
         const url = `/docs/${encodeURI(safePath)}`
-        const res = await fetch(url)
+        const res = await fetch(url, { signal: controller.signal })
         if (!res.ok) {
           throw new Error(`Gagal memuat dokumen: ${res.status}`)
         }
@@ -68,12 +70,20 @@ const DocView: React.FC = () => {
         const normalized = normalizeMarkdown(text)
         setContent(normalized)
       } catch (e: any) {
+        // Abaikan AbortError yang terjadi saat HMR/strict mode double-invoke
+        if (e?.name === 'AbortError') {
+          return
+        }
         setError(e?.message || 'Tidak dapat memuat dokumen.')
       } finally {
         setLoading(false)
       }
     }
     load()
+
+    return () => {
+      controller.abort()
+    }
   }, [safePath])
 
   return (
