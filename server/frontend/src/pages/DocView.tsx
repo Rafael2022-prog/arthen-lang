@@ -3,26 +3,53 @@ import { useSearchParams, Link } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
+const sanitizePath = (raw: string): string => {
+  let p = raw
+  try { p = decodeURIComponent(p) } catch {}
+  // Normalisasi pemisah path Windows ke POSIX
+  p = p.replace(/\\/g, '/')
+  // Buang drive letter Windows (mis. C:/, R:/)
+  p = p.replace(/^[A-Za-z]:\//, '')
+  // Jika masih ada prefix menuju folder docs, buang segala sesuatu sebelum 'docs/'
+  p = p.replace(/.*?docs\//i, '')
+  // Buang prefix '/docs/' jika ada
+  p = p.replace(/^\/?docs\//i, '')
+  // Buang leading slash
+  p = p.replace(/^\//, '')
+  // Hindari traversal
+  if (p.includes('..')) {
+    return ''
+  }
+  return p
+}
+
 const DocView: React.FC = () => {
   const [searchParams] = useSearchParams()
-  const path = searchParams.get('path')
+  const rawPath = searchParams.get('path') || ''
+  const safePath = sanitizePath(rawPath)
   const [content, setContent] = useState<string>('')
   const [error, setError] = useState<string>('')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const load = async () => {
-      if (!path) {
-        setError('Parameter path tidak ditemukan.')
+      if (!safePath) {
+        setError('Path dokumen tidak valid. Pastikan menggunakan path relatif dari folder docs/, mis. API.md atau TUTORIALS/solana.md')
         setLoading(false)
         return
       }
       try {
-        const res = await fetch(`/docs/${path}`)
+        const url = `/docs/${encodeURI(safePath)}`
+        const res = await fetch(url)
         if (!res.ok) {
           throw new Error(`Gagal memuat dokumen: ${res.status}`)
         }
         const text = await res.text()
+        // Deteksi fallback HTML (SPA) agar tidak dirender sebagai markdown
+        const lower = text.slice(0, 200).toLowerCase()
+        if (lower.includes('<!doctype html>') || lower.includes('<html') || lower.includes('/@vite/client')) {
+          throw new Error('Dokumen tidak ditemukan dalam /docs/. Pastikan path relatif dan file ada di server/frontend/public/docs')
+        }
         setContent(text)
       } catch (e: any) {
         setError(e?.message || 'Tidak dapat memuat dokumen.')
@@ -31,7 +58,7 @@ const DocView: React.FC = () => {
       }
     }
     load()
-  }, [path])
+  }, [safePath])
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
