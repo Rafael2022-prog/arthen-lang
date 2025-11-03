@@ -3,6 +3,8 @@ import { Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Home from './pages/Home'
 import Playground from './pages/Playground'
+import Docs from './pages/Docs'
+import DocView from './pages/DocView'
 
 const App: React.FC = () => {
   return (
@@ -12,6 +14,8 @@ const App: React.FC = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/playground" element={<Playground />} />
+          <Route path="/docs" element={<Docs />} />
+          <Route path="/docs/view" element={<DocView />} />
         </Routes>
       </main>
       <footer className="mt-16 border-t border-gray-800">
