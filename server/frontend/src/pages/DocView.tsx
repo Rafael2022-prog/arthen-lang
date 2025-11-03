@@ -70,8 +70,10 @@ const DocView: React.FC = () => {
         const normalized = normalizeMarkdown(text)
         setContent(normalized)
       } catch (e: any) {
-        // Abaikan AbortError yang terjadi saat HMR/strict mode double-invoke
-        if (e?.name === 'AbortError') {
+        const msg = String(e?.message || '').toLowerCase()
+        const name = String(e?.name || '').toLowerCase()
+        // Abaikan AbortError / net::ERR_ABORTED yang terjadi saat HMR/strict mode double-invoke
+        if (name.includes('abort') || msg.includes('abort')) {
           return
         }
         setError(e?.message || 'Tidak dapat memuat dokumen.')
