@@ -5,6 +5,18 @@ interface DocsIndex {
   files: string[]
 }
 
+const sanitizeDocPath = (raw: string): string => {
+  let p = raw
+  try { p = decodeURIComponent(p) } catch {}
+  p = p.replace(/\\/g, '/')
+  p = p.replace(/^[A-Za-z]:\//, '')
+  p = p.replace(/.*?docs\//i, '')
+  p = p.replace(/^\/?docs\//i, '')
+  p = p.replace(/^\//, '')
+  if (p.includes('..')) return ''
+  return p
+}
+
 const groupByFolder = (files: string[]) => {
   const groups: Record<string, string[]> = {}
   files.forEach((f) => {
@@ -43,7 +55,12 @@ const Docs: React.FC = () => {
         if (res.ok) {
           const data: DocsIndex = await res.json()
           if (Array.isArray(data.files) && data.files.length > 0) {
-            setFiles(data.files)
+            const cleaned = Array.from(new Set(
+              data.files.map(sanitizeDocPath).filter(Boolean)
+            ))
+            if (cleaned.length > 0) {
+              setFiles(cleaned)
+            }
           }
         }
       } catch (e) {
