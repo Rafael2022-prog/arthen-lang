@@ -466,3 +466,137 @@ jobs:
       run: |
         echo "❌ ARTHEN Language CI/CD Pipeline failed!"
         exit 1
+
+  build-frontend:
+    name: Build Frontend (Production)
+    runs-on: ubuntu-latest
+    needs: [code-quality]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/feature/'))
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: server/frontend/package-lock.json
+        
+    - name: Ensure Logo in Public
+      run: |
+        mkdir -p server/frontend/public
+        cp -f ARTHEN-LOGO-TRANSPARANSI.png server/frontend/public/ARTHEN-LOGO-TRANSPARANSI.png
+    
+    - name: Ensure Docs in Public
+      run: |
+        mkdir -p server/frontend/public/docs
+        cp -rf docs/* server/frontend/public/docs/
+        python - <<'PY'
+import os, json
+base = 'server/frontend/public/docs'
+files = []
+for root, _, fns in os.walk(base):
+    for fn in fns:
+        if fn.endswith('.md'):
+            rel = os.path.relpath(os.path.join(root, fn), base).replace('\\','/')
+            files.append(rel)
+with open(os.path.join(base,'index.json'),'w',encoding='utf-8') as f:
+    json.dump({'files': files}, f, ensure_ascii=False, indent=2)
+PY
+      
+    - name: Install Frontend Dependencies
+      working-directory: server/frontend
+      run: npm ci
+      
+    - name: Build Frontend
+      working-directory: server/frontend
+      run: npm run build
+      
+    - name: Upload Frontend Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: frontend-dist
+        path: server/frontend/dist/
+
+  generate-icons:
+    name: Generate Desktop Icons
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install Pillow
+      run: |
+        python -m pip install --upgrade pip
+        pip install Pillow
+    
+    - name: Generate Icons
+      run: python scripts/generate_icons.py
+    
+    - name: Upload Desktop Icons
+      uses: actions/upload-artifact@v3
+      with:
+        name: desktop-icons
+        path: assets/icons/
+
+  package-compiler-windows:
+    name: Package Compiler (PyInstaller, Windows)
+    runs-on: windows-latest
+    needs: [generate-icons]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install PyInstaller
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyinstaller
+    
+    - name: Build Compiler EXE (PyInstaller)
+      run: |
+        pyinstaller --onefile --name arthen-compiler --icon assets/icons/arthen.ico compiler/arthen_compiler.py
+    
+    - name: Upload Compiler EXE
+      uses: actions/upload-artifact@v3
+      with:
+        name: arthen-compiler-windows
+        path: dist/arthen-compiler.exe
+
+  package-cli-windows-pkg:
+    name: Package CLI (pkg, Windows)
+    runs-on: windows-latest
+    needs: [generate-icons]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+    
+    - name: Install pkg
+      run: npm install -g pkg
+    
+    - name: Build CLI EXE (pkg)
+      run: |
+        pkg --targets node18-win-x64 --output dist/arthen-cli.exe bin/arthen.js
+    
+    - name: Upload CLI EXE
+      uses: actions/upload-artifact@v3
+      with:
+        name: arthen-cli-windows
+        path: dist/arthen-cli.exe

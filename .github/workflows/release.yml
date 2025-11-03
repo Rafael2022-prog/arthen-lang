@@ -154,6 +154,23 @@ jobs:
           mkdir -p server/frontend/public
           cp -f ARTHEN-LOGO-TRANSPARANSI.png server/frontend/public/ARTHEN-LOGO-TRANSPARANSI.png
 
+      - name: Ensure Docs in Public
+        run: |
+          mkdir -p server/frontend/public/docs
+          cp -rf docs/* server/frontend/public/docs/
+          python - <<'PY'
+import os, json
+base = 'server/frontend/public/docs'
+files = []
+for root, _, fns in os.walk(base):
+    for fn in fns:
+        if fn.endswith('.md'):
+            rel = os.path.relpath(os.path.join(root, fn), base).replace('\\','/')
+            files.append(rel)
+with open(os.path.join(base,'index.json'),'w',encoding='utf-8') as f:
+    json.dump({'files': files}, f, ensure_ascii=False, indent=2)
+PY
+
       - name: Install Frontend Dependencies
         working-directory: server/frontend
         run: npm ci
