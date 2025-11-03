@@ -1,4 +1,4 @@
-name: Release
+name: Smoke Test CLI Binaries
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - 'v*'
 
 jobs:
-  smoke-binaries:
+  smoke:
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
@@ -121,71 +121,3 @@ jobs:
           name: smoke-logs-${{ matrix.os }}
           path: logs/*
           if-no-files-found: warn
-  build-and-release:
-    needs: smoke-binaries
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install build tools
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install build twine
-
-      - name: Build package
-        run: python -m build
-
-      - name: Twine check
-        run: python -m twine check dist/*
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-
-      - name: Ensure Logo in Public
-        run: |
-          mkdir -p server/frontend/public
-          cp -f ARTHEN-LOGO-TRANSPARANSI.png server/frontend/public/ARTHEN-LOGO-TRANSPARANSI.png
-
-      - name: Install Frontend Dependencies
-        working-directory: server/frontend
-        run: npm ci
-
-      - name: Install vsce
-        run: npm i -g vsce
-
-      - name: Package VSCode extension
-        working-directory: editors/vscode/arthen-file-icons
-        run: vsce package
-
-      - name: Install pkg
-        run: npm i -g pkg
-
-      - name: Package CLI (Direct Binaries)
-        run: |
-          mkdir -p dist/bin
-          npx pkg -t node18-win-x64,node18-linux-x64,node18-macos-x64,node18-macos-arm64 --out-path dist/bin bin/arthen.js
-
-      - name: Build Frontend (Production)
-        working-directory: server/frontend
-        run: npm run build
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          body_path: RELEASE_NOTES.md
-          files: |
-            dist/arthen_lang-*.tar.gz
-            dist/arthen_lang-*.whl
-            server/frontend/dist/**
-            editors/vscode/arthen-file-icons/*.vsix
-            dist/bin/*
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
