@@ -25,6 +25,19 @@ const sanitizePath = (raw: string): string => {
   return p
 }
 
+// Normalisasi konten markdown untuk kasus umum yang sering membuat tampilan "rusak"
+// - Sisipkan newline setelah penutup tag HTML block (</p>, </div>, dll) bila diikuti header '#'
+// - Hilangkan spasi di awal baris sebelum header '#'
+// - Samakan newline ke \n
+const normalizeMarkdown = (text: string): string => {
+  let t = text.replace(/\r\n/g, '\n')
+  // Jika ada literal HTML diikuti '#' pada baris yang sama, pecah menjadi baris baru
+  t = t.replace(/>(\s*)#(?=\s)/g, '>\n\n#')
+  // Hilangkan spasi di awal sebelum tanda '#'
+  t = t.replace(/^\s+#/gm, '#')
+  return t
+}
+
 const DocView: React.FC = () => {
   const [searchParams] = useSearchParams()
   const rawPath = searchParams.get('path') || ''
@@ -52,7 +65,8 @@ const DocView: React.FC = () => {
         if (lower.includes('<!doctype html>') || lower.includes('<html') || lower.includes('/@vite/client')) {
           throw new Error('Dokumen tidak ditemukan dalam /docs/. Pastikan path relatif dan file ada di server/frontend/public/docs')
         }
-        setContent(text)
+        const normalized = normalizeMarkdown(text)
+        setContent(normalized)
       } catch (e: any) {
         setError(e?.message || 'Tidak dapat memuat dokumen.')
       } finally {
